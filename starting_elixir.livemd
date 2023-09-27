@@ -1,0 +1,446 @@
+# Starting Elixir
+
+```elixir
+Mix.install([
+  {:req, "~> 0.4.3"},
+  {:csv, "~> 3.2"},
+  {:statistex, "~> 1.0"}
+])
+```
+
+## Basic Pattern Match
+
+```elixir
+x = 1
+x
+```
+
+```elixir
+1 = x
+```
+
+```elixir
+2 = x
+```
+
+```elixir
+1 = whatever
+```
+
+```elixir
+{a, b, c} = {:hello, true, 1}
+
+IO.inspect(a)
+IO.inspect(b)
+IO.inspect(c)
+```
+
+```elixir
+{a, b, c} = {:hello, "world"}
+```
+
+## Matching Lists
+
+Lists have some special matching cases
+
+```elixir
+a = [1, 2, 3]
+
+[head | tail] = a
+
+{head, tail}
+```
+
+```elixir
+a = [1]
+
+[head | tail] = a
+
+{head, tail}
+```
+
+```elixir
+a = []
+
+[head | tail] = a
+
+{head, tail}
+```
+
+```elixir
+# You may want to ignore parts of a match, that work for "_" underscore character
+
+a = [1, 2, 3]
+
+[head | _] = a
+
+head
+```
+
+## The Pin Operator
+
+```elixir
+x = 1
+
+^x = 2
+```
+
+```elixir
+x = 1
+
+a = [1, 2, 3]
+
+[^x, b, c] = a
+
+{b, c}
+```
+
+```elixir
+x = 2
+
+a = [1, 2, 3]
+
+[^x, b, c] = a
+```
+
+## A bit of maps
+
+```elixir
+user = %{"username" => "foo", "role" => "admin"}
+
+user["username"]
+```
+
+```elixir
+# Atoms and access to them
+user = %{username: "foo", role: "admin"}
+
+{user.username, user.role}
+```
+
+## A bit of data inmutability
+
+```elixir
+a = 1
+
+if a == 1 do
+  a = 2
+  IO.puts(a)
+end
+
+IO.puts(a)
+```
+
+```elixir
+map_a = %{"foo" => "bar"}
+IO.inspect(map_a)
+
+map_b = Map.put(map_a, "baz", "foo")
+IO.inspect(map_b)
+
+map_c = Map.delete(map_b, "baz")
+IO.inspect(map_c)
+
+# A common pattern to modify certain data structures
+# Is to return the new variable
+{val, map_d} = Map.pop(map_b, "baz")
+IO.inspect({val, map_d})
+
+true
+```
+
+## A Common Pattern Match case
+
+A common example is to use `{:ok, something}` and `{:error, something`}
+
+```elixir
+{:ok, response} = Req.get("https://api.github.com/repos/wojtekmach/req")
+
+response.body["description"]
+```
+
+```elixir
+# https://postman-echo.com/test return 404 always
+
+case Req.get("https://postman-echo.com/test") do
+  {:ok, %{status: status, body: body}} when 200 <= status and status < 300 ->
+    body
+
+  {:ok, %{status: status}} ->
+    "non ok response with code #{status}"
+
+  {:error, error} ->
+    "an error happened #{inspect(error)}"
+end
+```
+
+## The Pipe Operator
+
+```elixir
+a_map = %{"remove_me" => "wololooo"}
+
+# Last output will be first argument of next operator
+new_map = a_map |> Map.put("foo", "bar") |> Map.put("baz", "asdf") |> Map.delete("remove_me")
+
+new_map
+```
+
+## Functions
+
+```elixir
+# Function always goes in modules
+
+defmodule MyMod do
+  def foo(a, b) do
+    a + b
+  end
+end
+
+MyMod.foo(1, 2)
+```
+
+```elixir
+# default arguments
+defmodule SayHi do
+  def say_hi(msg \\ "Hi") do
+    msg
+  end
+end
+
+hi1 = SayHi.say_hi()
+hi2 = SayHi.say_hi("Hello")
+
+{hi1, hi2}
+```
+
+## Functions and Pattern Match
+
+```elixir
+defmodule Calculator do
+  def calc("+", a, b) do
+    a + b
+  end
+
+  def calc("-", a, b) do
+    a - b
+  end
+
+  def calc("*", a, b) do
+    a * b
+  end
+end
+
+IO.puts(Calculator.calc("+", 1, 2))
+IO.puts(Calculator.calc("-", 1, 2))
+IO.puts(Calculator.calc("*", 1, 2))
+
+true
+```
+
+```elixir
+# a Match error
+Calculator.calc("/", 1, 2)
+```
+
+## The first Recursion
+
+```elixir
+defmodule Recursion1 do
+  def repeat(msg, times \\ 3) do
+    if times > 0 do
+      IO.puts(msg)
+      repeat(msg, times - 1)
+    end
+  end
+end
+
+Recursion1.repeat("Hello")
+```
+
+## Recursion with pattern match
+
+```elixir
+defmodule Recursion2 do
+  def repeat(msg, times \\ 3)
+
+  def repeat(_msg, 0), do: true
+
+  def repeat(msg, times) do
+    IO.puts(msg)
+    repeat(msg, times - 1)
+  end
+end
+
+Recursion2.repeat("Hello")
+```
+
+```elixir
+# Lists and Recursion
+defmodule ListsRecursion do
+  def sum([]), do: 0
+
+  def sum([head | tail]) do
+    head + sum(tail)
+  end
+end
+
+ListsRecursion.sum([1, 2, 3])
+```
+
+```elixir
+# Or You can Just use built in libraries
+
+Enum.sum([1, 2, 3])
+```
+
+## A bit of Structs
+
+```elixir
+defmodule User do
+  defstruct [:email, name: "John", age: 27]
+end
+```
+
+```elixir
+%User{}
+```
+
+```elixir
+%User{email: "foo@example.com"}
+```
+
+## The Enum Module
+
+The Enum module allows us to easily iterate data
+
+```elixir
+a = [1, 2, 3]
+
+# multiply by 2 each value with map
+Enum.map(a, fn val -> val * 2 end)
+```
+
+```elixir
+require Enum
+require Integer
+
+a = 1..3
+
+IO.inspect(Range.to_list(a), label: "variable a")
+
+# Sum values that are odd, using Reduce
+Enum.reduce(a, fn val, accumulator ->
+  IO.puts("value: #{val}, accumulator: #{accumulator}")
+
+  if Integer.is_odd(val) do
+    accumulator + val
+  else
+    accumulator
+  end
+end)
+```
+
+```elixir
+a = 1..3
+
+IO.inspect(Range.to_list(a), label: "variable a")
+
+# Sum values that are odd, using Reduce
+Enum.reduce(a, fn val, accumulator ->
+  IO.puts("value: #{val}, accumulator: #{accumulator}")
+
+  if Integer.is_even(val) do
+    accumulator + val
+  else
+    accumulator
+  end
+end)
+```
+
+```elixir
+a = 1..3
+start_value = 0
+
+IO.inspect(Range.to_list(a), label: "variable a")
+
+# Sum values that are odd, using Reduce
+Enum.reduce(a, start_value, fn val, accumulator ->
+  IO.puts("value: #{val}, accumulator: #{accumulator}")
+
+  if Integer.is_even(val) do
+    accumulator + val
+  else
+    accumulator
+  end
+end)
+```
+
+```elixir
+# Lets take numbers until a specific condition
+
+a = 1..100
+
+Enum.reduce_while(a, 0, fn val, acc ->
+  newval = val + acc
+
+  cond do
+    newval == 60 ->
+      {:halt, newval}
+
+    Integer.mod(val, 10) == 0 ->
+      {:cont, newval}
+
+    true ->
+      {:cont, acc}
+  end
+end)
+```
+
+## Parte 2: Leer Datos de mi CSV
+
+```elixir
+stream =
+  File.stream!(
+    "topclickeds_07_2w.csv.gz",
+    [:compressed, read_ahead: 100_000],
+    1000
+  )
+  |> CSV.decode(headers: true, separator: ?\t)
+
+# a lazy object to read data
+csv_data = stream |> Enum.take(100_000) |> Enum.map(fn {:ok, item} -> item end)
+
+Enum.take(csv_data, 3)
+```
+
+```elixir
+# Get top 5 queries
+queries_count =
+  Enum.reduce(csv_data, %{}, fn %{"query" => query}, count_map ->
+    Map.update(count_map, query, 1, fn current -> current + 1 end)
+  end)
+
+IO.inspect(queries_count)
+
+queries_count
+|> Enum.sort(fn {_query1, count1}, {_query2, count2} -> count1 > count2 end)
+|> Enum.take(5)
+```
+
+```elixir
+# Mean of clicks by search query
+
+# queries_sum = queries_count |> Map.values() |> Enum.sum()
+queries_sum = 100_000
+
+queries_count_values = Map.values(queries_count)
+# [1528, 1148, ...]
+
+num_queries = length(Map.keys(queries_count))
+
+%{
+  "min" => Enum.min(queries_count_values),
+  "max" => Enum.max(queries_count_values),
+  "mean" => queries_sum / num_queries
+}
+```
