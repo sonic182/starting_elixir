@@ -8,6 +8,12 @@ Mix.install([
 ])
 ```
 
+## Overview
+
+Conceptos básicos en elixir
+
+Tutorial Complementario en: https://elixir-lang.org/getting-started/introduction.html
+
 ## Basic Pattern Match
 
 ```elixir
@@ -48,7 +54,10 @@ a = [1, 2, 3]
 
 [head | tail] = a
 
-{head, tail}
+IO.inspect(head)
+IO.inspect(tail)
+
+:ok
 ```
 
 ```elixir
@@ -56,7 +65,10 @@ a = [1]
 
 [head | tail] = a
 
-{head, tail}
+IO.inspect(head)
+IO.inspect(tail)
+
+:ok
 ```
 
 ```elixir
@@ -64,7 +76,7 @@ a = []
 
 [head | tail] = a
 
-{head, tail}
+head
 ```
 
 ```elixir
@@ -78,6 +90,12 @@ head
 ```
 
 ## The Pin Operator
+
+```elixir
+x = 1
+
+^x = 1
+```
 
 ```elixir
 x = 1
@@ -191,12 +209,12 @@ new_map
 # Function always goes in modules
 
 defmodule MyMod do
-  def foo(a, b) do
+  def sum(a, b) do
     a + b
   end
 end
 
-MyMod.foo(1, 2)
+MyMod.sum(1, 2)
 ```
 
 ```elixir
@@ -211,6 +229,23 @@ hi1 = SayHi.say_hi()
 hi2 = SayHi.say_hi("Hello")
 
 {hi1, hi2}
+```
+
+```elixir
+defmodule MyTypedMod do
+  @spec sum(number, integer) :: number
+  def sum(a, b) do
+    a + b
+  end
+end
+
+MyTypedMod.sum(1.1, 2)
+```
+
+```elixir
+# @specs are useful for Editors and code checkers (elixir-ls, credo, dyalizer, ...)
+
+MyTypedMod.sum(1, 2)
 ```
 
 ## Functions and Pattern Match
